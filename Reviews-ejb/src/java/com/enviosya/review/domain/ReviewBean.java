@@ -21,38 +21,52 @@ public class ReviewBean {
     static Logger log = Logger.getLogger("FILE");
     @PersistenceContext
     private EntityManager em;
+    private BlackListBean bl;
     @PostConstruct
     private void init() {
     }
 
-    public ReviewEntity agregar(ReviewEntity unClientEntity) {
+    public ReviewEntity agregar(ReviewEntity unReviewEntity) {
         try {
-            em.persist(unClientEntity);
-            return unClientEntity;
+            if (validoTextoContraBlackList(unReviewEntity.getComentarioEmisor())){
+                if (validoClienteEnEnvio(unReviewEntity.getIdCliente(), unReviewEntity.getIdEnvio())){
+                    if (validoCantMinimaDePalabras(unReviewEntity.getComentarioEmisor())){
+                        if (noExisteReviewEnvio(unReviewEntity.getIdEnvio())){
+                            unReviewEntity.setEstado("Pending");
+                            em.persist(unReviewEntity);
+                            return unReviewEntity;
+                        }
+                    }
+                }
+            }else{
+                unReviewEntity.setEstado("Rejected");
+                em.persist(unReviewEntity);
+                return unReviewEntity;
+            }                
         } catch (Exception e) {
-            log.error("Error en agregar Cliente Entity: " + e.getMessage());
+            log.error("Error en agregar Review Entity: " + e.getMessage());
         }
          return null;
     }
 
-    public ReviewEntity modificar(ReviewEntity unClienteEntity) {
+    public ReviewEntity modificar(ReviewEntity unReviewEntity) {
         try {
-            em.merge(unClienteEntity);
-            return unClienteEntity;
+            em.merge(unReviewEntity);
+            return unReviewEntity;
         } catch (Exception e) {
-             log.error("Error en eliminar Cliente Entity: " + e.getMessage());
+             log.error("Error en eliminar Review Entity: " + e.getMessage());
         }
         return null;
     }
 
-    public boolean eliminar(ReviewEntity unClientEntity) {
+    public boolean eliminar(ReviewEntity unReviewEntity) {
         try {
             ReviewEntity aBorrar =
-            em.find(ReviewEntity.class, unClientEntity.getId());
+            em.find(ReviewEntity.class, unReviewEntity.getId());
             em.remove(aBorrar);
             return true;
         } catch (Exception e) {
-             log.error("Error en eliminar Cliente Entity: " + e.getMessage());
+             log.error("Error en eliminar Review Entity: " + e.getMessage());
 
         }
           return false;
@@ -60,29 +74,56 @@ public class ReviewBean {
 
     public List<ReviewEntity> listar() {
         List<ReviewEntity> list =
-                em.createQuery("select u from ClientEntity u").getResultList();
+                em.createQuery("select u from ReviewEntity u").getResultList();
         return list;
     }
 
-//    public Client buscar(Long id) {
-//        ReviewEntity ent = em.find(ReviewEntity.class, id);
-//        Client u = new Client();
-//        u.setId(ent.getId());
-//        u.setNombre(ent.getNombre());
-//        return u;
-//    }
-
-    public List<ReviewEntity> buscar(String nombre) {
-        List<ReviewEntity> listaCliente =
-                em.createQuery("select u from ClientEntity u "
-                + "where u.nombre = :nombre")
-                .setParameter("nombre", nombre).getResultList();
-        return listaCliente;
+    public List<ReviewEntity> buscar(Long id) {
+        List<ReviewEntity> listaReview =
+                em.createQuery("select u from ReviewEntity u "
+                + "where u.id = :id")
+                .setParameter("id", id).getResultList();
+        return listaReview;
     }
-
+    public boolean noExisteReviewEnvio(Long id) {
+        List<ReviewEntity> listaReview =
+                em.createQuery("select u from ReviewEntity u "
+                + "where u.idEnvio = :idEnvio")
+                .setParameter("idEnvio", id).getResultList();
+        return listaReview.isEmpty();
+    }
+    
+    private boolean validoTextoContraBlackList(String texto)
+    {
+        String[] textoSpliteado = texto.split(" ");
+        for (int i = 0; i < textoSpliteado.length; i++) {
+            if(!bl.existe(textoSpliteado[i]))
+            {
+                  return false;
+            }
+        }
+        return true;
+    }
+    
+    private boolean validoClienteEnEnvio(int idCliente, Long idEnvio)
+    {
+        return true;
+    }
+    
+    private boolean validoCantMinimaDePalabras(String texto)
+    {
+        String[] textoSpliteado = texto.split(" ");
+        /*for (int i = 0; i < textoSpliteado.length; i++) {
+            if(!bl.existe(textoSpliteado[i]))
+            {
+                  return false;
+            }
+        }*/
+        return true;
+    }
     public List<ReviewEntity> listarClientesEnvios() {
         List<ReviewEntity> listaClientes = em.createQuery("SELECT u "
-                + "FROM ClientEntity u",
+                + "FROM ReviewEntity u",
                ReviewEntity.class).getResultList();
        return listaClientes;
    }

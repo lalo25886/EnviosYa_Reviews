@@ -23,17 +23,15 @@ public class ReviewEntity implements Serializable {
     @NotNull
     private Long idEnvio;
     
-    @NotNull
-    private int califEmisorCadete;
+    private int idCliente;//Cliente que envia la review
     
-    @NotNull
-    private int califReceptorCadete;
+    private int califEmisorCadete; //Calificacion del emisor sobre el cadete
+   
+    private int califReceptorCadete; //Calificacion del receptor sobre el cadete
     
-    @NotNull
-    private int califEmisorServicio;
-    
-    @NotNull
-    private int califReceptorServicio;
+    private int califEmisorServicio;//Calificacion del emisor sobre el servicio
+   
+    private int califReceptorServicio;//Calificacion del receptor sobre el cadete
     
     @Column(length = 300)
     private String comentarioEmisor;
@@ -115,6 +113,14 @@ public class ReviewEntity implements Serializable {
 
     public void setEstado(String estado) {
         this.estado = estado;
+    }
+
+    public int getIdCliente() {
+        return idCliente;
+    }
+
+    public void setIdCliente(int idCliente) {
+        this.idCliente = idCliente;
     }
     
     @Override

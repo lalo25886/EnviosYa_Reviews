@@ -14,6 +14,7 @@ import java.util.Objects;
 public class Review {
     private Long id;
     private Long idEnvio;
+    private Long idCliente;
     private int califEmisorCadete;
     private int califReceptorCadete;
     private int califEmisorServicio;
@@ -36,6 +37,14 @@ public class Review {
 
     public void setIdEnvio(Long idEnvio) {
         this.idEnvio = idEnvio;
+    }
+
+    public Long getIdCliente() {
+        return idCliente;
+    }
+
+    public void setIdCliente(Long idCliente) {
+        this.idCliente = idCliente;
     }
 
     public int getCalifEmisorCadete() {
