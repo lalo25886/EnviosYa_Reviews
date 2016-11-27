@@ -78,6 +78,7 @@ public class Review {
         this.comentarioEmisor = comentarioEmisor;
     }
 
+
     public String getComentarioReceptor() {
         return comentarioReceptor;
     }
