@@ -37,7 +37,7 @@ public class BlackListResource {
     }
 
     @GET
-    @Path("getReviews")
+    @Path("getBlackList")
     @Produces(MediaType.APPLICATION_JSON)
     public String getJson() {
         List<BlackListEntity> list = blackListBean.listar();
@@ -45,13 +45,26 @@ public class BlackListResource {
         return gson.toJson(list);
     }
     @GET
-    @Path("getReview/{id}")
+    @Path("getBlackList/{id}")
     @Consumes(MediaType.TEXT_HTML)
     public String getRevieweNotificar(@PathParam("id") String id) {
         BlackListEntity unReview = new BlackListEntity();
         unReview.setId(Long.parseLong(id));
         String retorno ="";// blackListBean.buscarReview(unReview.getId());
         return retorno;
+    }
+     @POST
+    @Path("getBlackListPalabra")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getBlackListPalabra(String body) {
+        Gson gson = new Gson();
+        BlackListEntity u = gson.fromJson(body, BlackListEntity.class);
+        System.out.println("llego a ws: " + body);
+        BlackListBean unaBlackList = new BlackListBean();
+       
+         List<BlackListEntity> list = unaBlackList.buscar(u.getPalabra().trim());
+        
+        return gson.toJson(list);
     }
 
     @POST

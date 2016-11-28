@@ -4,8 +4,16 @@ package com.enviosya.review.domain;
 import com.enviosya.review.persistence.ReviewEntity;
 import java.util.List;
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import javax.ejb.Stateless;
 import javax.ejb.LocalBean;
+import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.MessageProducer;
+import javax.jms.Queue;
+import javax.jms.Session;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import org.apache.log4j.Logger;
@@ -17,7 +25,10 @@ import org.apache.log4j.Logger;
 @Stateless
 @LocalBean
 public class ReviewBean {
-
+    @Resource(lookup = "jms/ConnectionFactory")
+    private ConnectionFactory connectionFactory;
+    @Resource(lookup = "jms/QueueCadete")
+    private Queue queueCadete;
     static Logger log = Logger.getLogger("FILE");
     @PersistenceContext
     private EntityManager em;
@@ -26,7 +37,7 @@ public class ReviewBean {
     private void init() {
     }
 
-    public ReviewEntity agregar(ReviewEntity unReviewEntity) {
+    public ReviewEntity agregar(ReviewEntity unReviewEntity) throws JMSException {
         try {
             if (validoTextoContraBlackList(unReviewEntity.getComentarioEmisor())){
                 if (validoClienteEnEnvio(unReviewEntity.getIdCliente(), unReviewEntity.getIdEnvio())){
@@ -34,9 +45,24 @@ public class ReviewBean {
                         if (noExisteReviewEnvio(unReviewEntity.getIdEnvio())){
                             unReviewEntity.setEstado("Pending");
                             em.persist(unReviewEntity);
+                              try (
+            Connection connection = connectionFactory.createConnection();
+            Session session = connection.createSession()) {
+                              MessageProducer productorDeMensajeCadete =
+                    session.createProducer(queueCadete);
+                              Message mensaje =
+            session.createTextMessage("Creo Review");
+            productorDeMensajeCadete.send(mensaje);
+                              }
                             return unReviewEntity;
+                        }else{
+                            log.error("Error en validacion de si existe review");
                         }
+                    }else{
+                        log.error("Error en validacion cantidad minima de palabras");
                     }
+                }else{
+                    log.error("Error en validacion Cliente en envio");
                 }
             }else{
                 unReviewEntity.setEstado("Rejected");
@@ -86,22 +112,25 @@ public class ReviewBean {
         return listaReview;
     }
     public boolean noExisteReviewEnvio(Long id) {
-        List<ReviewEntity> listaReview =
+      /*  List<ReviewEntity> listaReview =
                 em.createQuery("select u from ReviewEntity u "
                 + "where u.idEnvio = :idEnvio")
                 .setParameter("idEnvio", id).getResultList();
         return listaReview.isEmpty();
+        */
+      return true;
     }
     
     private boolean validoTextoContraBlackList(String texto)
     {
+        /*bl = new BlackListBean();
         String[] textoSpliteado = texto.split(" ");
         for (int i = 0; i < textoSpliteado.length; i++) {
-            if(!bl.existe(textoSpliteado[i]))
+            if(bl.existe(textoSpliteado[i].trim()))
             {
                   return false;
             }
-        }
+        }*/
         return true;
     }
     

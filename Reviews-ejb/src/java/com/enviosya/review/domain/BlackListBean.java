@@ -75,20 +75,22 @@ public class BlackListBean {
 //        return u;
 //    }
 
-    public List<BlackListEntity> buscar(String nombre) {
-        List<BlackListEntity> listaCliente =
-                em.createQuery("select u from BlackListEntity u "
-                + "where u.palabra = :palabra")
-                .setParameter("palabra", nombre).getResultList();
+    public List<BlackListEntity> buscar(String palabra) {
+        System.out.println("palabra: " + palabra);
+         List<BlackListEntity> listaCliente = em.createQuery("SELECT u.* FROM BlackListEntity u "
+                + "WHERE u.palabra = :palabra",BlackListEntity.class)
+                .setParameter("palabra", palabra).getResultList();
+        System.err.println(listaCliente.isEmpty()+"LALO");
         return listaCliente;
     }
      public boolean existe(String palabra) {
         List<BlackListEntity> listaCliente =
-                em.createQuery("select u from BlackListEntity u "
+                em.createQuery("select  from BlackListEntity u "
                 + "where u.palabra = :palabra")
                 .setParameter("palabra", palabra).getResultList();
        
         return listaCliente.isEmpty();
+        
     }
 
     public List<BlackListEntity> listarClientesEnvios() {
