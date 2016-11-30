@@ -42,81 +42,81 @@ public class ReviewResource {
         Gson gson = new Gson();
         return gson.toJson(list);
     }
-    @GET
-    @Path("getReview/{id}")
-    @Consumes(MediaType.TEXT_HTML)
-    public String getRevieweNotificar(@PathParam("id") String id) {
-        ReviewEntity unReview = new ReviewEntity();
-        unReview.setId(Long.parseLong(id));
-        String retorno ="";// reviewBean.buscarReview(unReview.getId());
-        return retorno;
-    }
-
-    @POST
-    @Path("add")
-    @Consumes(MediaType.APPLICATION_JSON)
-    public Response agregar(String body) throws JMSException {
-        Gson gson = new Gson();
-        ReviewEntity u = gson.fromJson(body, ReviewEntity.class);
-        u.setFecha(new Date());
-        Response r;
-        ReviewEntity creado = reviewBean.agregar(u);
-        if (creado == null) {
-            r = Response
-                    .status(Response.Status.BAD_REQUEST)
-                    .entity("Review")
-                    .build();
-        } else {
-            r = Response
-                    .status(Response.Status.CREATED)
-                    .entity(gson.toJson(creado))
-                    .build();
-        }
-        return r;
-    }
-
-    @POST
-    @Path("update")
-    @Consumes(MediaType.APPLICATION_JSON)
-    public Response modificar(String body) {
-        Gson gson = new Gson();
-        ReviewEntity u = gson.fromJson(body, ReviewEntity.class);
-        Response r;
-        ReviewEntity modificado = reviewBean.modificar(u);
-        if (modificado == null) {
-            r = Response
-                    .status(Response.Status.BAD_REQUEST)
-                    .entity("Review")
-                    .build();
-        } else {
-            r = Response
-                    .status(Response.Status.CREATED)
-                    .entity(gson.toJson(modificado))
-                    .build();
-        }
-        return r;
-    }
-    @POST
-    @Path("delete")
-    @Consumes(MediaType.APPLICATION_JSON)
-    public Response eliminar(String body) {
-        Gson gson = new Gson();
-        ReviewEntity u = gson.fromJson(body, ReviewEntity.class);
-        Response r;
-        Boolean modificado = reviewBean.eliminar(u);
-        if (!modificado) {
-            r = Response
-                    .status(Response.Status.BAD_REQUEST)
-                    .entity("Reviewe")
-                    .build();
-        } else {
-            r = Response
-                    .status(Response.Status.CREATED)
-                    .entity(gson.toJson(modificado))
-                    .build();
-        }
-        return r;
-    }
+//    @GET
+//    @Path("getReview/{id}")
+//    @Consumes(MediaType.TEXT_HTML)
+//    public String getRevieweNotificar(@PathParam("id") String id) {
+//        ReviewEntity unReview = new ReviewEntity();
+//        unReview.setId(Long.parseLong(id));
+//        String retorno ="";// reviewBean.buscarReview(unReview.getId());
+//        return retorno;
+//    }
+//
+//    @POST
+//    @Path("add")
+//    @Consumes(MediaType.APPLICATION_JSON)
+//    public Response agregar(String body) throws JMSException {
+//        Gson gson = new Gson();
+//        ReviewEntity u = gson.fromJson(body, ReviewEntity.class);
+//        u.setFecha(new Date());
+//        Response r;
+//        ReviewEntity creado = reviewBean.agregar(u);
+//        if (creado == null) {
+//            r = Response
+//                    .status(Response.Status.BAD_REQUEST)
+//                    .entity("Review")
+//                    .build();
+//        } else {
+//            r = Response
+//                    .status(Response.Status.CREATED)
+//                    .entity(gson.toJson(creado))
+//                    .build();
+//        }
+//        return r;
+//    }
+//
+//    @POST
+//    @Path("update")
+//    @Consumes(MediaType.APPLICATION_JSON)
+//    public Response modificar(String body) {
+//        Gson gson = new Gson();
+//        ReviewEntity u = gson.fromJson(body, ReviewEntity.class);
+//        Response r;
+//        ReviewEntity modificado = reviewBean.modificar(u);
+//        if (modificado == null) {
+//            r = Response
+//                    .status(Response.Status.BAD_REQUEST)
+//                    .entity("Review")
+//                    .build();
+//        } else {
+//            r = Response
+//                    .status(Response.Status.CREATED)
+//                    .entity(gson.toJson(modificado))
+//                    .build();
+//        }
+//        return r;
+//    }
+//    @POST
+//    @Path("delete")
+//    @Consumes(MediaType.APPLICATION_JSON)
+//    public Response eliminar(String body) {
+//        Gson gson = new Gson();
+//        ReviewEntity u = gson.fromJson(body, ReviewEntity.class);
+//        Response r;
+//        Boolean modificado = reviewBean.eliminar(u);
+//        if (!modificado) {
+//            r = Response
+//                    .status(Response.Status.BAD_REQUEST)
+//                    .entity("Reviewe")
+//                    .build();
+//        } else {
+//            r = Response
+//                    .status(Response.Status.CREATED)
+//                    .entity(gson.toJson(modificado))
+//                    .build();
+//        }
+//        return r;
+//    }
 
     @GET
     @Path("getReview/{idCadete}")

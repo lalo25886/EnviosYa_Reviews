@@ -44,50 +44,50 @@ public class BlackListResource {
         Gson gson = new Gson();
         return gson.toJson(list);
     }
-    @GET
-    @Path("getBlackList/{id}")
-    @Consumes(MediaType.TEXT_HTML)
-    public String getRevieweNotificar(@PathParam("id") String id) {
-        BlackListEntity unReview = new BlackListEntity();
-        unReview.setId(Long.parseLong(id));
-        String retorno ="";// blackListBean.buscarReview(unReview.getId());
-        return retorno;
-    }
-     @POST
-    @Path("getBlackListPalabra")
-    @Produces(MediaType.APPLICATION_JSON)
-    public String getBlackListPalabra(String body) {
-        Gson gson = new Gson();
-        BlackListEntity u = gson.fromJson(body, BlackListEntity.class);
-        System.out.println("llego a ws: " + body);
-        BlackListBean unaBlackList = new BlackListBean();
-       
-         List<BlackListEntity> list = unaBlackList.buscar(u.getPalabra().trim());
-        
-        return gson.toJson(list);
-    }
+//    @GET
+//    @Path("getBlackList/{id}")
+//    @Consumes(MediaType.TEXT_HTML)
+//    public String getRevieweNotificar(@PathParam("id") String id) {
+//        BlackListEntity unReview = new BlackListEntity();
+//        unReview.setId(Long.parseLong(id));
+//        String retorno ="";// blackListBean.buscarReview(unReview.getId());
+//        return retorno;
+//    }
+//     @POST
+//    @Path("getBlackListPalabra")
+//    @Produces(MediaType.APPLICATION_JSON)
+//    public String getBlackListPalabra(String body) {
+//        Gson gson = new Gson();
+//        BlackListEntity u = gson.fromJson(body, BlackListEntity.class);
+//        System.out.println("llego a ws: " + body);
+//        BlackListBean unaBlackList = new BlackListBean();
+//       
+//         List<BlackListEntity> list = unaBlackList.buscar(u.getPalabra().trim());
+//        
+//        return gson.toJson(list);
+//    }
 
-    @POST
-    @Path("add")
-    @Consumes(MediaType.APPLICATION_JSON)
-    public Response agregar(String body) {
-        Gson gson = new Gson();
-        BlackListEntity u = gson.fromJson(body, BlackListEntity.class);
-        Response r;
-        BlackListEntity creado = blackListBean.agregar(u);
-        if (creado == null) {
-            r = Response
-                    .status(Response.Status.BAD_REQUEST)
-                    .entity("Review")
-                    .build();
-        } else {
-            r = Response
-                    .status(Response.Status.CREATED)
-                    .entity(gson.toJson(creado))
-                    .build();
-        }
-        return r;
-    }
+//    @POST
+//    @Path("add")
+//    @Consumes(MediaType.APPLICATION_JSON)
+//    public Response agregar(String body) {
+//        Gson gson = new Gson();
+//        BlackListEntity u = gson.fromJson(body, BlackListEntity.class);
+//        Response r;
+//        BlackListEntity creado = blackListBean.agregar(u);
+//        if (creado == null) {
+//            r = Response
+//                    .status(Response.Status.BAD_REQUEST)
+//                    .entity("Review")
+//                    .build();
+//        } else {
+//            r = Response
+//                    .status(Response.Status.CREATED)
+//                    .entity(gson.toJson(creado))
+//                    .build();
+//        }
+//        return r;
+//    }
 
     @POST
     @Path("update")
