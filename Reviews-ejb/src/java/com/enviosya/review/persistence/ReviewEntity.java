@@ -26,7 +26,7 @@ public class ReviewEntity implements Serializable {
     @NotNull
     private Long idEnvio;
 
-    private int idCliente;//Cliente que envia la review
+    private Long idCliente;//Cliente que envia la review
 
     private int califEmisorCadete; //Calificacion del emisor sobre el cadete
 
@@ -123,11 +123,11 @@ public class ReviewEntity implements Serializable {
         this.estado = estado;
     }
 
-    public int getIdCliente() {
+    public Long getIdCliente() {
         return idCliente;
     }
 
-    public void setIdCliente(int idCliente) {
+    public void setIdCliente(Long idCliente) {
         this.idCliente = idCliente;
     }
 

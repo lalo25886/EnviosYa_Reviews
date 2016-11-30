@@ -2,7 +2,14 @@
 package com.enviosya.review.domain;
 
 import com.enviosya.review.persistence.ReviewEntity;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
+import java.util.logging.Level;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.ejb.Stateless;
@@ -16,6 +23,7 @@ import javax.jms.Queue;
 import javax.jms.Session;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceException;
 import org.apache.log4j.Logger;
 
 /**
@@ -27,8 +35,8 @@ import org.apache.log4j.Logger;
 public class ReviewBean {
     @Resource(lookup = "jms/ConnectionFactory")
     private ConnectionFactory connectionFactory;
-    @Resource(lookup = "jms/QueueCadete")
-    private Queue queueCadete;
+    @Resource(lookup = "jms/QueueReview")
+    private Queue queueReview;
     static Logger log = Logger.getLogger("FILE");
     @PersistenceContext
     private EntityManager em;
@@ -39,37 +47,10 @@ public class ReviewBean {
 
     public ReviewEntity agregar(ReviewEntity unReviewEntity) throws JMSException {
         try {
-            if (validoTextoContraBlackList(unReviewEntity.getComentarioEmisor())){
-                if (validoClienteEnEnvio(unReviewEntity.getIdCliente(), unReviewEntity.getIdEnvio())){
-                    if (validoCantMinimaDePalabras(unReviewEntity.getComentarioEmisor())){
-                        if (noExisteReviewEnvio(unReviewEntity.getIdEnvio())){
-                            unReviewEntity.setEstado("Pending");
-                            em.persist(unReviewEntity);
-                              try (
-            Connection connection = connectionFactory.createConnection();
-            Session session = connection.createSession()) {
-                              MessageProducer productorDeMensajeCadete =
-                    session.createProducer(queueCadete);
-                              Message mensaje =
-            session.createTextMessage("Creo Review");
-            productorDeMensajeCadete.send(mensaje);
-                              }
-                            return unReviewEntity;
-                        }else{
-                            log.error("Error en validacion de si existe review");
-                        }
-                    }else{
-                        log.error("Error en validacion cantidad minima de palabras");
-                    }
-                }else{
-                    log.error("Error en validacion Cliente en envio");
-                }
-            }else{
-                unReviewEntity.setEstado("Rejected");
-                em.persist(unReviewEntity);
-                return unReviewEntity;
-            }                
-        } catch (Exception e) {
+            em.persist(unReviewEntity);
+            this.notificar(unReviewEntity);
+            return unReviewEntity;
+        } catch (PersistenceException | JMSException e) {
             log.error("Error en agregar Review Entity: " + e.getMessage());
         }
          return null;
@@ -121,34 +102,80 @@ public class ReviewBean {
       return true;
     }
     
-    private boolean validoTextoContraBlackList(String texto)
-    {
-        /*bl = new BlackListBean();
-        String[] textoSpliteado = texto.split(" ");
-        for (int i = 0; i < textoSpliteado.length; i++) {
-            if(bl.existe(textoSpliteado[i].trim()))
-            {
-                  return false;
+    public boolean tieneTextoBlackList(String texto)
+        throws PersistenceException {
+        List<String> listaPalabras;
+        try {
+            listaPalabras =
+                    em.createQuery("select u.palabra from BlackListEntity u")
+                    .getResultList();
+            String[] textoSpliteado = texto.split(" ");
+            if (listaPalabras.isEmpty()) {
+                return false;
+            } 
+            for (int i = 0; i <= textoSpliteado.length; i++) {
+                if (listaPalabras.contains(textoSpliteado[i].trim())) {
+                    return true;
+                }
             }
-        }*/
-        return true;
+            return false;
+        } catch (PersistenceException e) {
+            log.error("Error en tieneTextoBlackList:"
+                       + " " + e.getMessage());
+               throw new PersistenceException("Error en tieneTextoBlackList.");
+        }
     }
     
-    private boolean validoClienteEnEnvio(int idCliente, Long idEnvio)
-    {
+    public boolean validoClienteEnEnvio(Long idEnvio, Long idCliente)
+            throws MalformedURLException, IOException {
+        String datos = "{\"id\": \"" + idEnvio + "\",\"idCliente\": "
+                + "\"" + idCliente + "\"}";
+
+        String link = "http://localhost:8080/Shipments-war/"
+                    + "shipment/isClient/" + datos;
+        String error = "0";
+        String r = "";
+        try {
+
+            URL url = new URL(link);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Accept", "application/json");
+
+            if (conn.getResponseCode() != 200) {
+                    throw new RuntimeException("Failed : HTTP error code : "
+                                    + conn.getResponseCode());
+            }
+            BufferedReader br = new BufferedReader(new InputStreamReader(
+                    (conn.getInputStream())));
+            String output = "";
+            while ((output = br.readLine()) != null) {
+                    r = output;
+            }
+            System.out.println("VALIDO CLIENTE RES: " + r);
+            conn.disconnect();
+            if (r.equalsIgnoreCase(error)) {
+                return false;
+            }
+            
+        } catch (MalformedURLException ex) {
+            log.error("Error en existeCliente[1]:"
+                       + " " + ex.getMessage());
+               throw new MalformedURLException("Error en la URL: " + link);
+        } catch (IOException ex) {
+           log.error("Error en getCadeteNotificarEntidad[2]:"
+                       + " " + ex.getMessage());
+               throw new IOException("Error en getCadeteNotificarEntidad.");
+        }
         return true;
     }
-    
-    private boolean validoCantMinimaDePalabras(String texto)
-    {
+
+    public boolean validoCantMinimaDePalabras(String texto) {
         String[] textoSpliteado = texto.split(" ");
-        /*for (int i = 0; i < textoSpliteado.length; i++) {
-            if(!bl.existe(textoSpliteado[i]))
-            {
-                  return false;
-            }
-        }*/
-        return true;
+        if (textoSpliteado.length > 3 ) {
+            return true;
+        }
+        return false;
     }
     public List<ReviewEntity> listarClientesEnvios() {
         List<ReviewEntity> listaClientes = em.createQuery("SELECT u "
@@ -163,5 +190,69 @@ public class ReviewBean {
                ReviewEntity.class).getResultList();
        return listaClientes;
    }
+      public boolean isNumeric(String cadena) {
+	try {
+		Integer.parseInt(cadena);
+		return true;
+	} catch (NumberFormatException nfe) {
+		return false;
+	}
+      }
+      public boolean enRango(int valor) {
+	try {
+                if (valor > 0 && valor < 6) {
+                    return true;
+                }else {
+                    return false;
+                }	
+	} catch (NumberFormatException nfe) {
+		return false;
+	}
+      }
+      public boolean tieneReviewPendiente(Long envio, String estado) 
+              throws PersistenceException {
+        List<ReviewEntity> listaReview;
+        try {
+        listaReview = em.createQuery("select u from ReviewEntity u "
+                + "where u.idEnvio = :id and estado = :estado")
+                .setParameter("id", envio)
+                .setParameter("estado", estado)
+                .getResultList();
+        return !listaReview.isEmpty();
+
+        } catch (PersistenceException e) {
+            log.error("Error en tieneReviewPendiente(Long envio, "
+                    + "String estado): " + e.getMessage());
+            throw new PersistenceException("Error en tieneReviewPendiente"
+                    + "(Long envio, String estado). ");
+        }
+    }
+    public int calificarSemantica (String texto) {
+        // Acá se debería invocar un servicio que retorne la calificación
+        // del texto. En nuestro caso envíasmos siempre el mismo ya que el 
+        //profesor nos comenta que lo hagamos así
+        return 1;  
+    }
+    public void notificar(ReviewEntity review) throws JMSException {
+     
+        try (
+            Connection connection = connectionFactory.createConnection();
+            Session session = connection.createSession() ) {
+            
+            MessageProducer productorDeMensajeReview =
+                        session.createProducer(queueReview);
+            
+            Message mensaje =
+                session.createTextMessage("El proceso de review del cliente "
+                        + "número " + review.getIdCliente() + " ha "
+                        + "finalizado correctamente.");
+                productorDeMensajeReview.send(mensaje);
+        session.close();
+        } catch (JMSException ex) {
+            log.error("Error al notificar la review número " + review.getId());
+            throw new JMSException("Error al notificar la review "
+                    + "número " + review.getId());
+        }
+    }
 }
 
