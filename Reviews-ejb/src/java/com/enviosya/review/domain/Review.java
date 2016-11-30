@@ -5,6 +5,7 @@
  */
 package com.enviosya.review.domain;
 
+import java.util.Date;
 import java.util.Objects;
 
 /**
@@ -22,6 +23,8 @@ public class Review {
     private String comentarioEmisor;
     private String comentarioReceptor;
     private String estado;
+    private Date fecha;
+    private Long idCadete;
 
     public Long getId() {
         return id;
@@ -102,6 +105,22 @@ public class Review {
 
     public void setEstado(String estado) {
         this.estado = estado;
+    }
+
+    public Date getFecha() {
+        return fecha;
+    }
+
+    public void setFecha(Date fecha) {
+        this.fecha = fecha;
+    }
+
+    public Long getIdCadete() {
+        return idCadete;
+    }
+
+    public void setIdCadete(Long idCadete) {
+        this.idCadete = idCadete;
     }
 
     @Override

@@ -157,6 +157,11 @@ public class ReviewBean {
        return listaClientes;
    }
 
-
+    public List<ReviewEntity> listarReviewsCadete(Long idCadete) {
+        List<ReviewEntity> listaClientes = em.createQuery("SELECT u "
+                + "FROM ReviewEntity u",
+               ReviewEntity.class).getResultList();
+       return listaClientes;
+   }
 }
 

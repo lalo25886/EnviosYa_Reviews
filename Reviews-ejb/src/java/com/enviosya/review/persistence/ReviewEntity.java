@@ -1,11 +1,14 @@
 package com.enviosya.review.persistence;
 
 import java.io.Serializable;
+import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -19,30 +22,35 @@ public class ReviewEntity implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    
+
     @NotNull
     private Long idEnvio;
-    
+
     private int idCliente;//Cliente que envia la review
-    
+
     private int califEmisorCadete; //Calificacion del emisor sobre el cadete
-   
+
     private int califReceptorCadete; //Calificacion del receptor sobre el cadete
-    
+
     private int califEmisorServicio;//Calificacion del emisor sobre el servicio
-   
+
     private int califReceptorServicio;//Calificacion del receptor sobre el cadete
-    
+
     @Column(length = 300)
     private String comentarioEmisor;
-    
+
     @Column(length = 300)
     private String comentarioReceptor;
-    
+
     @NotNull
     @Column(length = 300)
     private String estado;
-    
+
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date fecha;
+
+    private Long idCadete;
+
     public Long getId() {
         return id;
     }
@@ -122,22 +130,42 @@ public class ReviewEntity implements Serializable {
     public void setIdCliente(int idCliente) {
         this.idCliente = idCliente;
     }
-    
+
+    public Date getFecha() {
+        return fecha;
+    }
+
+    public void setFecha(Date fecha) {
+        this.fecha = fecha;
+    }
+
+    public Long getIdCadete() {
+        return idCadete;
+    }
+
+    public void setIdCadete(Long idCadete) {
+        this.idCadete = idCadete;
+    }
+
     @Override
     public int hashCode() {
         int hash = 0;
-        hash += (id != null ? id.hashCode() : 0);
+        hash += (id != null
+                ? id.hashCode()
+                : 0);
         return hash;
     }
 
     @Override
     public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
         if (!(object instanceof ReviewEntity)) {
             return false;
         }
         ReviewEntity other = (ReviewEntity) object;
-        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
+        if ((this.id == null
+                && other.id != null)
+                || (this.id != null
+                && !this.id.equals(other.id))) {
             return false;
         }
         return true;
@@ -147,5 +175,4 @@ public class ReviewEntity implements Serializable {
     public String toString() {
         return "ReviewEntity id=" + id;
     }
-    
 }
