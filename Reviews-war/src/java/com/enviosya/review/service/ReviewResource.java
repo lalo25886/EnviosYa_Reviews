@@ -5,11 +5,10 @@ import com.enviosya.review.domain.ReporteCalificacion;
 import com.enviosya.review.domain.ReviewBean;
 import com.enviosya.review.persistence.ReviewEntity;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.ejb.EJB;
 import javax.jms.JMSException;
 import javax.persistence.PersistenceException;
@@ -228,7 +227,7 @@ public class ReviewResource {
     public String getReviewCadete(@PathParam("idCadete") String idCadete) {
         ReviewEntity unReview = new ReviewEntity();
         unReview.setIdCadete(Long.parseLong(idCadete));
-        String retorno ="";// reviewBean.buscarReview(unReview.getId());
+        String retorno ="";
         return retorno;
     }
 
@@ -336,10 +335,10 @@ public class ReviewResource {
     }
     @POST
     @Path("reporteCalif/{idEnvio}")
-    //@Consumes(MediaType.TEXT_HTML)
     @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     public Response reporteCalif(@PathParam("idEnvio") String idE) {
-        System.out.println("ENVIO : " + idE );
+        Gson responses = new GsonBuilder().create();
         ReviewEntity unR = null;
         try {
             if (!reviewBean.isNumeric(idE)) {
@@ -360,27 +359,26 @@ public class ReviewResource {
                             .entity(error)
                             .build();
             }
-            System.out.println("TAMAÑO : " + lista.size() );
             for (int i = 0; i <= lista.size(); i++) {
                  if (lista.get(i) != null) {
                      unR = lista.get(i);
                      i = lista.size() + 1;
                  }
             }
-            System.out.println("UN R : " + unR.getComentario());
             List<ReviewEntity> listaRet =
                     reviewBean.obtenerCalif(unR.getIdCadete(), "approved");
             ReporteCalificacion reporte = new ReporteCalificacion();
             reporte.setIdEnvio(unR.getIdEnvio());
             reporte.setIdCadete(unR.getIdCadete());
             reporte.setListaCalificaciones(listaRet);
+            String i = responses.toJson(reporte);
             return Response
                             .status(Response.Status.CREATED)
-                            .entity(reporte)
+                            .entity(i)
                             .build();
         } catch (PersistenceException e) {
-            String error = "Error al obtener reporte. "
-                + "Verifique los datos.";
+            String error = responses.toJson("Error al obtener reporte. "
+                + "Verifique los datos.");
                 return Response
                             .status(Response.Status.ACCEPTED)
                             .entity(error)

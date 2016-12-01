@@ -9,7 +9,6 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
-import java.util.logging.Level;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.ejb.EJBException;
@@ -46,7 +45,8 @@ public class ReviewBean {
     private void init() {
     }
 
-    public ReviewEntity agregar(ReviewEntity unReviewEntity) throws JMSException {
+    public ReviewEntity agregar(ReviewEntity unReviewEntity)
+            throws JMSException {
         try {
             em.persist(unReviewEntity);
             this.notificar(unReviewEntity);
@@ -102,7 +102,7 @@ public class ReviewBean {
         */
       return true;
     }
-    
+
     public boolean tieneTextoBlackList(String texto)
         throws PersistenceException {
         List<String> listaPalabras;
