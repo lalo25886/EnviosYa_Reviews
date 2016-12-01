@@ -86,10 +86,10 @@ public class ReviewBean {
         return list;
     }
 
-    public List<ReviewEntity> buscar(Long id) {
+    public List<ReviewEntity> existe(Long id) {
         List<ReviewEntity> listaReview =
                 em.createQuery("select u from ReviewEntity u "
-                + "where u.id = :id")
+                + "where u.idEnvio = :id")
                 .setParameter("id", id).getResultList();
         return listaReview;
     }
@@ -237,7 +237,7 @@ public class ReviewBean {
 
         try (
             Connection connection = connectionFactory.createConnection();
-            Session session = connection.createSession() ) {
+            Session session = connection.createSession()) {
 
             MessageProducer productorDeMensajeReview =
                         session.createProducer(queueReview);

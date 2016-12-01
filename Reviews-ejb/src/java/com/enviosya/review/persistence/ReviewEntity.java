@@ -28,21 +28,14 @@ public class ReviewEntity implements Serializable {
     @NotNull
     private Long idEnvio;
 
-    private Long idCliente;//Cliente que envia la review
+    private Long idCliente;
 
-    private int califEmisorCadete; //Calificacion del emisor sobre el cadete
+    private int califCadete;
 
-    private int califReceptorCadete; //Calificacion del receptor sobre el cadete
-
-    private int califEmisorServicio;//Calificacion del emisor sobre el servicio
-
-    private int califReceptorServicio;//Calificacion del receptor sobre el cadete
+    private int califServicio;
 
     @Column(length = 300)
-    private String comentarioEmisor;
-
-    @Column(length = 300)
-    private String comentarioReceptor;
+    private String comentario;
 
     @NotNull
     @Column(length = 300)
@@ -68,55 +61,6 @@ public class ReviewEntity implements Serializable {
     public void setIdEnvio(Long idEnvio) {
         this.idEnvio = idEnvio;
     }
-
-    public int getCalifEmisorCadete() {
-        return califEmisorCadete;
-    }
-
-    public void setCalifEmisorCadete(int califEmisorCadete) {
-        this.califEmisorCadete = califEmisorCadete;
-    }
-
-    public int getCalifReceptorCadete() {
-        return califReceptorCadete;
-    }
-
-    public void setCalifReceptorCadete(int califReceptorCadete) {
-        this.califReceptorCadete = califReceptorCadete;
-    }
-
-    public int getCalifEmisorServicio() {
-        return califEmisorServicio;
-    }
-
-    public void setCalifEmisorServicio(int califEmisorServicio) {
-        this.califEmisorServicio = califEmisorServicio;
-    }
-
-    public int getCalifReceptorServicio() {
-        return califReceptorServicio;
-    }
-
-    public void setCalifReceptorServicio(int califReceptorServicio) {
-        this.califReceptorServicio = califReceptorServicio;
-    }
-
-    public String getComentarioEmisor() {
-        return comentarioEmisor;
-    }
-
-    public void setComentarioEmisor(String comentarioEmisor) {
-        this.comentarioEmisor = comentarioEmisor;
-    }
-
-    public String getComentarioReceptor() {
-        return comentarioReceptor;
-    }
-
-    public void setComentarioReceptor(String comentarioReceptor) {
-        this.comentarioReceptor = comentarioReceptor;
-    }
-
     public String getEstado() {
         return estado;
     }
@@ -149,6 +93,30 @@ public class ReviewEntity implements Serializable {
         this.idCadete = idCadete;
     }
 
+    public int getCalifCadete() {
+        return califCadete;
+    }
+
+    public void setCalifCadete(int califCadete) {
+        this.califCadete = califCadete;
+    }
+
+    public int getCalifServicio() {
+        return califServicio;
+    }
+
+    public void setCalifServicio(int califServicio) {
+        this.califServicio = califServicio;
+    }
+
+    public String getComentario() {
+        return comentario;
+    }
+
+    public void setComentario(String comentario) {
+        this.comentario = comentario;
+    }
+    
     @Override
     public int hashCode() {
         int hash = 0;

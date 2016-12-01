@@ -62,7 +62,6 @@ public class ReviewResource {
     public Response agregar(String body) {
         Gson gson = new Gson();
         String vacio = "";
-        System.out.println("BODY :" + body);
         ReviewEntity u = gson.fromJson(body, ReviewEntity.class);
   Response r;
         String estado = "pending";
@@ -76,7 +75,7 @@ public class ReviewResource {
                             .entity(error)
                             .build();
             }
-            if (u.getComentarioEmisor().equalsIgnoreCase(vacio)) {
+            if (u.getComentario().equalsIgnoreCase(vacio)) {
                 String error = "Error al agregar una review. "
                 + "Debe ingresar un comentario.";
                 return Response
@@ -84,8 +83,7 @@ public class ReviewResource {
                             .entity(error)
                             .build();
             }
-            if (!reviewBean.isNumeric(String.valueOf(u.getIdCliente()))
-                || !reviewBean.isNumeric(String.valueOf(u.getIdCliente()))) {
+            if (!reviewBean.isNumeric(String.valueOf(u.getIdCliente()))) {
                 String error = "Error al agregar una review. "
                 + "Verfique los datos del envío y del cliente.";
                 return Response
@@ -93,8 +91,8 @@ public class ReviewResource {
                             .entity(error)
                             .build();
             }
-            if (!reviewBean.enRango(u.getCalifEmisorCadete())
-                || !reviewBean.enRango(u.getCalifEmisorServicio())) {
+            if (!reviewBean.enRango(u.getCalifCadete())
+                || !reviewBean.enRango(u.getCalifServicio())) {
                 String error = "Error al agregar una review. "
                 + "Las calificaciones deben ser un valor numérico entre"
                         + " 1 y 5";
@@ -114,7 +112,7 @@ public class ReviewResource {
                             .build();
             }
             if (!reviewBean
-                    .validoCantMinimaDePalabras(u.getComentarioEmisor())) {
+                    .validoCantMinimaDePalabras(u.getComentario())) {
                  String error = "Error al agregar una review. "
                 + "El comentario debe contener mas palabras.";
                 return Response
@@ -122,10 +120,10 @@ public class ReviewResource {
                             .entity(error)
                             .build();
             }
-            if (reviewBean.tieneTextoBlackList(u.getComentarioEmisor())) {
+            if (reviewBean.tieneTextoBlackList(u.getComentario())) {
                 u.setEstado("rejected");
             }
-            int calif = reviewBean.calificarSemantica(u.getComentarioEmisor());
+            int calif = reviewBean.calificarSemantica(u.getComentario());
             //calificaciones
             // 1 - positivo
             // 2 - neutro
@@ -231,5 +229,108 @@ public class ReviewResource {
         unReview.setIdCadete(Long.parseLong(idCadete));
         String retorno ="";// reviewBean.buscarReview(unReview.getId());
         return retorno;
+    }
+
+    @POST
+    @Path("add2")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response agregarDos(String body) {
+        Gson gson = new Gson();
+        String vacio = "";
+        System.out.println("BODY :" + body);
+        ReviewEntity u = gson.fromJson(body, ReviewEntity.class);
+  Response r;
+        String estado = "pending";
+        try {
+            if (reviewBean.tieneReviewPendiente(u.getIdEnvio(), estado)) {
+                String error = "Error al agregar una review. "
+                + "Existen reviews pendientes para el envío número "
+                        + u.getIdEnvio() + ".";
+                return Response
+                            .status(Response.Status.ACCEPTED)
+                            .entity(error)
+                            .build();
+            }
+            if (u.getComentario().equalsIgnoreCase(vacio)) {
+                String error = "Error al agregar una review. "
+                + "Debe ingresar un comentario.";
+                return Response
+                            .status(Response.Status.ACCEPTED)
+                            .entity(error)
+                            .build();
+            }
+            if (!reviewBean.isNumeric(String.valueOf(u.getIdCliente()))) {
+                String error = "Error al agregar una review. "
+                + "Verfique los datos del envío y del cliente.";
+                return Response
+                            .status(Response.Status.ACCEPTED)
+                            .entity(error)
+                            .build();
+            }
+            if (!reviewBean.enRango(u.getCalifCadete())
+                || !reviewBean.enRango(u.getCalifServicio())) {
+                String error = "Error al agregar una review. "
+                + "Las calificaciones deben ser un valor numérico entre"
+                        + " 1 y 5";
+                return Response
+                            .status(Response.Status.ACCEPTED)
+                            .entity(error)
+                            .build();
+            }
+
+            if (!reviewBean
+                    .validoCantMinimaDePalabras(u.getComentario())) {
+                 String error = "Error al agregar una review. "
+                + "El comentario debe contener mas palabras.";
+                return Response
+                            .status(Response.Status.ACCEPTED)
+                            .entity(error)
+                            .build();
+            }
+            if (reviewBean.tieneTextoBlackList(u.getComentario())) {
+                u.setEstado("rejected");
+            }
+            int calif =
+                    reviewBean.calificarSemantica(u.getComentario());
+            //calificaciones
+            // 1 - positivo
+            // 2 - neutro
+            // 3 - negativo
+            if (calif == 1) {
+                u.setEstado("approved");
+            } else {
+                u.setEstado("rejected");
+            }
+            u.setFecha(new Date());
+            ReviewEntity creado = reviewBean.agregar(u);
+             return Response
+                            .status(Response.Status.CREATED)
+                            .entity("La review se creo exitosamente "
+                                    + "con el numero: " + creado.getId() + ".")
+                            .build();
+        } catch (NumberFormatException ex) {
+            String error = "Error al agregar una review. "
+                + "Verifique los datos. Excepción: NumberFormatException "
+                    + ex.getMessage();
+                return Response
+                            .status(Response.Status.ACCEPTED)
+                            .entity(error)
+                            .build();
+
+        } catch (JMSException ex) {
+            String error = "Error al agregar una review. "
+                + "Verifique los datos. Excepción: JMSException";
+                return Response
+                            .status(Response.Status.ACCEPTED)
+                            .entity(error)
+                            .build();
+        } catch (PersistenceException ex) {
+            String error = "Error al agregar una review. "
+                + "Verifique los datos. Excepción: PersistenceException";
+                return Response
+                            .status(Response.Status.ACCEPTED)
+                            .entity(error)
+                            .build();
+        }
     }
 }

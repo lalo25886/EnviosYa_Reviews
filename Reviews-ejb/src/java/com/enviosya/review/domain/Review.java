@@ -16,12 +16,9 @@ public class Review {
     private Long id;
     private Long idEnvio;
     private Long idCliente;
-    private int califEmisorCadete;
-    private int califReceptorCadete;
-    private int califEmisorServicio;
-    private int califReceptorServicio;
-    private String comentarioEmisor;
-    private String comentarioReceptor;
+    private int califCadete;
+    private int califServicio;
+    private String comentario;
     private String estado;
     private Date fecha;
     private Long idCadete;
@@ -50,53 +47,28 @@ public class Review {
         this.idCliente = idCliente;
     }
 
-    public int getCalifEmisorCadete() {
-        return califEmisorCadete;
+    public int getCalifCadete() {
+        return califCadete;
     }
 
-    public void setCalifEmisorCadete(int califEmisorCadete) {
-        this.califEmisorCadete = califEmisorCadete;
+    public void setCalifCadete(int califCadete) {
+        this.califCadete = califCadete;
     }
 
-    public int getCalifReceptorCadete() {
-        return califReceptorCadete;
+    public int getCalifServicio() {
+        return califServicio;
     }
 
-    public void setCalifReceptorCadete(int califReceptorCadete) {
-        this.califReceptorCadete = califReceptorCadete;
+    public void setCalifServicio(int califServicio) {
+        this.califServicio = califServicio;
     }
 
-    public int getCalifEmisorServicio() {
-        return califEmisorServicio;
+    public String getComentario() {
+        return comentario;
     }
 
-    public void setCalifEmisorServicio(int califEmisorServicio) {
-        this.califEmisorServicio = califEmisorServicio;
-    }
-
-    public int getCalifReceptorServicio() {
-        return califReceptorServicio;
-    }
-
-    public void setCalifReceptorServicio(int califReceptorServicio) {
-        this.califReceptorServicio = califReceptorServicio;
-    }
-
-    public String getComentarioEmisor() {
-        return comentarioEmisor;
-    }
-
-    public void setComentarioEmisor(String comentarioEmisor) {
-        this.comentarioEmisor = comentarioEmisor;
-    }
-
-
-    public String getComentarioReceptor() {
-        return comentarioReceptor;
-    }
-
-    public void setComentarioReceptor(String comentarioReceptor) {
-        this.comentarioReceptor = comentarioReceptor;
+    public void setComentario(String comentario) {
+        this.comentario = comentario;
     }
 
     public String getEstado() {
@@ -121,38 +93,5 @@ public class Review {
 
     public void setIdCadete(Long idCadete) {
         this.idCadete = idCadete;
-    }
-
-    @Override
-    public int hashCode() {
-        int hash = 5;
-        hash = 37 * hash + Objects.hashCode(this.id);
-        hash = 37 * hash + Objects.hashCode(this.idEnvio);
-        hash = 37 * hash + this.califEmisorCadete;
-        return hash;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final Review other = (Review) obj;
-        if (this.califEmisorCadete != other.califEmisorCadete) {
-            return false;
-        }
-        if (!Objects.equals(this.id, other.id)) {
-            return false;
-        }
-        if (!Objects.equals(this.idEnvio, other.idEnvio)) {
-            return false;
-        }
-        return true;
     }
 }
