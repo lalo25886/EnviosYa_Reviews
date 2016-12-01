@@ -10,12 +10,14 @@ import javax.persistence.Id;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
  * @author Gonzalo
  */
 @Entity
+@XmlRootElement
 public class ReviewEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;

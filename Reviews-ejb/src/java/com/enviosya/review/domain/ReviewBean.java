@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.logging.Level;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import javax.ejb.EJBException;
 import javax.ejb.Stateless;
 import javax.ejb.LocalBean;
 import javax.jms.Connection;
@@ -112,7 +113,7 @@ public class ReviewBean {
             String[] textoSpliteado = texto.split(" ");
             if (listaPalabras.isEmpty()) {
                 return false;
-            } 
+            }
             for (int i = 0; i <= textoSpliteado.length; i++) {
                 if (listaPalabras.contains(textoSpliteado[i].trim())) {
                     return true;
@@ -125,14 +126,10 @@ public class ReviewBean {
                throw new PersistenceException("Error en tieneTextoBlackList.");
         }
     }
-    
     public boolean validoClienteEnEnvio(Long idEnvio, Long idCliente)
-            throws MalformedURLException, IOException {
-        String datos = "{\"id\": \"" + idEnvio + "\",\"idCliente\": "
-                + "\"" + idCliente + "\"}";
-
-        String link = "http://localhost:8080/Shipments-war/"
-                    + "shipment/isClient/" + datos;
+            throws MalformedURLException, IOException, EJBException {
+        String link = "http://localhost:8080/Shipments-war/shipment/isclient/"
+                + idEnvio + "/" + idCliente;
         String error = "0";
         String r = "";
         try {
@@ -157,15 +154,18 @@ public class ReviewBean {
             if (r.equalsIgnoreCase(error)) {
                 return false;
             }
-            
         } catch (MalformedURLException ex) {
-            log.error("Error en existeCliente[1]:"
+            log.error("Error en validoClienteEnEnvio[1]:"
+                       + " " + ex.getMessage());
+               throw new MalformedURLException("Error en la URL: " + link);
+        } catch (EJBException ex) {
+            log.error("Error en validoClienteEnEnvio[1]:"
                        + " " + ex.getMessage());
                throw new MalformedURLException("Error en la URL: " + link);
         } catch (IOException ex) {
-           log.error("Error en getCadeteNotificarEntidad[2]:"
+           log.error("Error en validoClienteEnEnvio[2]:"
                        + " " + ex.getMessage());
-               throw new IOException("Error en getCadeteNotificarEntidad.");
+               throw new IOException("Error en validoClienteEnEnvio.");
         }
         return true;
     }
@@ -202,9 +202,9 @@ public class ReviewBean {
 	try {
                 if (valor > 0 && valor < 6) {
                     return true;
-                }else {
+                } else {
                     return false;
-                }	
+                }
 	} catch (NumberFormatException nfe) {
 		return false;
 	}
@@ -214,7 +214,7 @@ public class ReviewBean {
         List<ReviewEntity> listaReview;
         try {
         listaReview = em.createQuery("select u from ReviewEntity u "
-                + "where u.idEnvio = :id and estado = :estado")
+                + "where u.idEnvio = :id and u.estado = :estado")
                 .setParameter("id", envio)
                 .setParameter("estado", estado)
                 .getResultList();
@@ -229,19 +229,19 @@ public class ReviewBean {
     }
     public int calificarSemantica (String texto) {
         // Acá se debería invocar un servicio que retorne la calificación
-        // del texto. En nuestro caso envíasmos siempre el mismo ya que el 
+        // del texto. En nuestro caso envíamos siempre el mismo ya que el
         //profesor nos comenta que lo hagamos así
-        return 1;  
+        return 1;
     }
     public void notificar(ReviewEntity review) throws JMSException {
-     
+
         try (
             Connection connection = connectionFactory.createConnection();
             Session session = connection.createSession() ) {
-            
+
             MessageProducer productorDeMensajeReview =
                         session.createProducer(queueReview);
-            
+
             Message mensaje =
                 session.createTextMessage("El proceso de review del cliente "
                         + "número " + review.getIdCliente() + " ha "

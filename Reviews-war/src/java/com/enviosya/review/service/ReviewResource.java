@@ -62,8 +62,9 @@ public class ReviewResource {
     public Response agregar(String body) {
         Gson gson = new Gson();
         String vacio = "";
+        System.out.println("BODY :" + body);
         ReviewEntity u = gson.fromJson(body, ReviewEntity.class);
-
+  Response r;
         String estado = "pending";
         try {
             if (reviewBean.tieneReviewPendiente(u.getIdEnvio(), estado)) {
@@ -93,7 +94,7 @@ public class ReviewResource {
                             .build();
             }
             if (!reviewBean.enRango(u.getCalifEmisorCadete())
-                || !reviewBean.enRango(u.getCalifEmisorCadete())) {
+                || !reviewBean.enRango(u.getCalifEmisorServicio())) {
                 String error = "Error al agregar una review. "
                 + "Las calificaciones deben ser un valor numérico entre"
                         + " 1 y 5";
@@ -136,13 +137,22 @@ public class ReviewResource {
             }
             u.setFecha(new Date());
             ReviewEntity creado = reviewBean.agregar(u);
-            return Response
+             return Response
                             .status(Response.Status.CREATED)
-                            .entity(creado)
+                            .entity("La review se creo exitosamente "
+                                    + "con el numero: " + creado.getId() + ".")
                             .build();
         } catch (IOException ex) {
             String error = "Error al agregar una review. "
                 + "Verifique los datos. Excepción: IOException";
+                return Response
+                            .status(Response.Status.ACCEPTED)
+                            .entity(error)
+                            .build();
+        } catch (NumberFormatException ex) {
+            String error = "Error al agregar una review. "
+                + "Verifique los datos. Excepción: NumberFormatException "
+                    + ex.getMessage();
                 return Response
                             .status(Response.Status.ACCEPTED)
                             .entity(error)
@@ -165,7 +175,6 @@ public class ReviewResource {
         }
     }
 
-    
 
     @POST
     @Path("update")
@@ -189,7 +198,7 @@ public class ReviewResource {
                             .build();
         }
     }
-    
+
     @POST
     @Path("delete")
     @Consumes(MediaType.APPLICATION_JSON)
