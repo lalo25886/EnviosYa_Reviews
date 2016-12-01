@@ -254,5 +254,40 @@ public class ReviewBean {
                     + "número " + review.getId());
         }
     }
+    public List<ReviewEntity> obtenerCalif(Long idCadete, String estado) 
+              throws PersistenceException {
+        List<ReviewEntity> listaReview;
+        try {
+        listaReview = em.createQuery("select u from ReviewEntity u "
+                + "where u.idCadete = :id and u.estado = :estado "
+                + "ORDER BY u.fecha desc")
+                .setParameter("id", idCadete)
+                .setParameter("estado", estado)
+                .getResultList();
+        return listaReview;
+
+        } catch (PersistenceException e) {
+            log.error("Error en obtenerCalif: " + e.getMessage());
+            throw new PersistenceException("Error en obtenerCalif: "
+                    + e.getMessage());
+        }
+    }
+    public List<ReviewEntity> obtenerReview(Long idEnvio) 
+              throws PersistenceException {
+        List<ReviewEntity> listaReview;
+        try {
+        listaReview = em.createQuery("select u from ReviewEntity u "
+                + "where u.idEnvio = :idEnvio ")
+                .setParameter("idEnvio", idEnvio)
+                .setMaxResults(1)
+                .getResultList();
+        return listaReview;
+
+        } catch (PersistenceException e) {
+            log.error("Error en obtenerReview(Long idEnvio) " + e.getMessage());
+            throw new PersistenceException("Error en "
+                    + "obtenerReview(Long idEnvio) " + e.getMessage());
+        }
+    }
 }
 

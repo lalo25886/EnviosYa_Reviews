@@ -1,6 +1,7 @@
 
 package com.enviosya.review.service;
 
+import com.enviosya.review.domain.ReporteCalificacion;
 import com.enviosya.review.domain.ReviewBean;
 import com.enviosya.review.persistence.ReviewEntity;
 import com.google.gson.Gson;
@@ -237,7 +238,7 @@ public class ReviewResource {
     public Response agregarDos(String body) {
         Gson gson = new Gson();
         String vacio = "";
-        System.out.println("BODY :" + body);
+
         ReviewEntity u = gson.fromJson(body, ReviewEntity.class);
   Response r;
         String estado = "pending";
@@ -327,6 +328,59 @@ public class ReviewResource {
         } catch (PersistenceException ex) {
             String error = "Error al agregar una review. "
                 + "Verifique los datos. Excepción: PersistenceException";
+                return Response
+                            .status(Response.Status.ACCEPTED)
+                            .entity(error)
+                            .build();
+        }
+    }
+    @POST
+    @Path("reporteCalif/{idEnvio}")
+    //@Consumes(MediaType.TEXT_HTML)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response reporteCalif(@PathParam("idEnvio") String idE) {
+        System.out.println("ENVIO : " + idE );
+        ReviewEntity unR = null;
+        try {
+            if (!reviewBean.isNumeric(idE)) {
+                String error = "Error al obtener reporte. "
+                + "Verfique los datos del envío.";
+                return Response
+                            .status(Response.Status.ACCEPTED)
+                            .entity(error)
+                            .build();
+            }
+            List<ReviewEntity> lista =
+                    reviewBean.obtenerReview(Long.parseLong(idE));
+            if (lista.isEmpty()) {
+                String error = "Error al obtener reporte. "
+                + "No existe un envío con el id " + idE + ".";
+                return Response
+                            .status(Response.Status.ACCEPTED)
+                            .entity(error)
+                            .build();
+            }
+            System.out.println("TAMAÑO : " + lista.size() );
+            for (int i = 0; i <= lista.size(); i++) {
+                 if (lista.get(i) != null) {
+                     unR = lista.get(i);
+                     i = lista.size() + 1;
+                 }
+            }
+            System.out.println("UN R : " + unR.getComentario());
+            List<ReviewEntity> listaRet =
+                    reviewBean.obtenerCalif(unR.getIdCadete(), "approved");
+            ReporteCalificacion reporte = new ReporteCalificacion();
+            reporte.setIdEnvio(unR.getIdEnvio());
+            reporte.setIdCadete(unR.getIdCadete());
+            reporte.setListaCalificaciones(listaRet);
+            return Response
+                            .status(Response.Status.CREATED)
+                            .entity(reporte)
+                            .build();
+        } catch (PersistenceException e) {
+            String error = "Error al obtener reporte. "
+                + "Verifique los datos.";
                 return Response
                             .status(Response.Status.ACCEPTED)
                             .entity(error)
