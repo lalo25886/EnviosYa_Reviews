@@ -9,7 +9,10 @@ import com.google.gson.GsonBuilder;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.ejb.EJB;
+import javax.ejb.EJBException;
 import javax.jms.JMSException;
 import javax.persistence.PersistenceException;
 import javax.ws.rs.Consumes;
@@ -334,14 +337,17 @@ public class ReviewResource {
         }
     }
     @POST
-    @Path("reporteCalif/{idEnvio}")
+    @Path("reporteCalif/{idCliente}/{idEnvio}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response reporteCalif(@PathParam("idEnvio") String idE) {
+    public Response reporteCalif(@PathParam("idCliente") String idC, 
+                                 @PathParam("idEnvio") String idE) {
         Gson responses = new GsonBuilder().create();
         ReviewEntity unR = null;
         try {
-            if (!reviewBean.isNumeric(idE)) {
+            System.out.println(idC + " y " + idE );
+            System.out.println("IS NUMERIC");
+            if (!reviewBean.isNumeric(idE) || !reviewBean.isNumeric(idC)) {
                 String error = "Error al obtener reporte. "
                 + "Verfique los datos del envío.";
                 return Response
@@ -349,6 +355,16 @@ public class ReviewResource {
                             .entity(error)
                             .build();
             }
+            System.out.println("validoClienteLogueado LLLLLLLLLLLLLLLL");
+            if (!reviewBean.validoClienteLogueado(Long.valueOf(idC))) {
+                 String error = "Error al obtener reporte. "
+                + "El usuario no esta logueado.";
+                return Response
+                            .status(Response.Status.ACCEPTED)
+                            .entity(error)
+                            .build();
+            }
+            System.out.println("obtenerReview LLLLLLLLLLLLLLLL");
             List<ReviewEntity> lista =
                     reviewBean.obtenerReview(Long.parseLong(idE));
             if (lista.isEmpty()) {
@@ -377,7 +393,21 @@ public class ReviewResource {
                             .entity(i)
                             .build();
         } catch (PersistenceException e) {
-            String error = responses.toJson("Error al obtener reporte. "
+            String error = responses.toJson("[1] Error al obtener reporte. "
+                + "Verifique los datos.");
+                return Response
+                            .status(Response.Status.ACCEPTED)
+                            .entity(error)
+                            .build();
+        } catch (IOException ex) {
+             String error = responses.toJson("[2] Error al obtener reporte. "
+                + "Verifique los datos.");
+                return Response
+                            .status(Response.Status.ACCEPTED)
+                            .entity(error)
+                            .build();
+        } catch (EJBException ex) {
+             String error = responses.toJson("[3] Error al obtener reporte. "
                 + "Verifique los datos.");
                 return Response
                             .status(Response.Status.ACCEPTED)

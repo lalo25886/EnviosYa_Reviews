@@ -289,5 +289,49 @@ public class ReviewBean {
                     + "obtenerReview(Long idEnvio) " + e.getMessage());
         }
     }
+    public boolean validoClienteLogueado(Long idCliente)
+            throws MalformedURLException, IOException, EJBException {
+        String link = "http://localhost:8080/Clients-war/client/islogin/"
+                + idCliente;
+        System.out.println("LINK : " + link );
+        String error = "0";
+        String r = "";
+        try {
+
+            URL url = new URL(link);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Accept", "application/json");
+
+            if (conn.getResponseCode() != 200) {
+                    throw new RuntimeException("Failed : HTTP error code : "
+                                    + conn.getResponseCode());
+            }
+            BufferedReader br = new BufferedReader(new InputStreamReader(
+                    (conn.getInputStream())));
+            String output = "";
+            while ((output = br.readLine()) != null) {
+                    r = output;
+            }
+            System.out.println("VALIDO CLIENTE RES: " + r);
+            conn.disconnect();
+            if (r.equalsIgnoreCase(error)) {
+                return false;
+            }
+        } catch (MalformedURLException ex) {
+            log.error("Error en validoClienteEnEnvio[1]:"
+                       + " " + ex.getMessage());
+               throw new MalformedURLException("Error en la URL: " + link);
+        } catch (EJBException ex) {
+            log.error("Error en validoClienteEnEnvio[1]:"
+                       + " " + ex.getMessage());
+               throw new MalformedURLException("Error en la URL: " + link);
+        } catch (IOException ex) {
+           log.error("Error en validoClienteEnEnvio[2]:"
+                       + " " + ex.getMessage());
+               throw new IOException("Error en validoClienteEnEnvio.");
+        }
+        return true;
+    }
 }
 
